@@ -4,10 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { FilterData } from '../../Models/FilterData';
 import { ClientsService } from '../../../feature/Services/clients.service';
 import { SwalService } from '../../../global/swal.service';
+import { CollectionsService } from '../../../feature/Services/collections.service';
+import { GridConfigurationModel } from '../../Models/grid-configuration.model';
+import { CommonAgGrid } from '../common-ag-grid/common-ag-grid';
 
 @Component({
   selector: 'app-dashboard-component',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, CommonAgGrid],
   templateUrl: './dashboard-component.html',
   styleUrl: './dashboard-component.css',
 })
@@ -17,14 +20,20 @@ export class DashboardComponent implements OnInit {
   filterdata: FilterData = new FilterData();
   clientsData: any[] = [];
   totalClients: number = 0;
+  totalCollections: number = 0;
   thisMonthClients: number = 0;
+  thisMonthCollectionSum: number = 0;
+  todaysTotalCollection: number = 0;
+  gridConfiguration: GridConfigurationModel = new GridConfigurationModel();
 
   constructor(private clientsService: ClientsService, private cdr: ChangeDetectorRef,
-    private swalService: SwalService,
+    private swalService: SwalService, private collectionService: CollectionsService,
   ) {}
 
   ngOnInit(): void {
-    this.GetData();
+    this.GetClientsData();
+    this.GetRecentCollectionData();
+    this.GetCollectionGridHeaders();
   }
 
   // checkCharacterCount(): boolean {
@@ -53,7 +62,26 @@ export class DashboardComponent implements OnInit {
   //   return true;
   // }
 
-  public async GetData() {
+  // method to get filter configuration from Grid View
+  onGridEvent(gridFilter: any): void {
+    this.gridConfiguration.gridFilter = gridFilter;
+    this.GetRecentCollectionData();
+  }
+
+  public GetCollectionGridHeaders() {
+    const columns: any[] = [      
+      { field: 'clientName', width: 100, headerName: 'Farmer', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'centerName', width: 100, headerName: 'Center Name', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'quantity', width: 300, headerName: 'Milk', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'collectionShift', width: 100, headerName: 'Collection Shift', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'collectionDate', width: 100, headerName: 'Collection Date', flex: 1, sortable: true, filter: true, resizable: true },
+    ];
+    this.gridConfiguration.gridColumns = columns;
+    this.gridConfiguration.gridHeight = "300px";
+    this.gridConfiguration.isPaginationEnabled = false;
+  }
+
+  public async GetClientsData() {
     try{
       const today = new Date();
       const dateBefore120Days = new Date();
@@ -67,6 +95,29 @@ export class DashboardComponent implements OnInit {
             this.clientsData = response.data;
             this.totalClients = response.totalCount;
             this.thisMonthClients = response.thisMonthTotal;            ;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.swalService.ShowAlert("error", "");
+          }
+        });
+      //} ✅
+    }
+    catch(err) {
+      throw err;
+    }
+  }
+
+  public async GetRecentCollectionData() {
+    try{
+        ( await this.collectionService.GetRecentCollections()).subscribe({
+          next: (res) => {            
+            let response = JSON.parse(JSON.stringify(res));
+            //console.log(response);
+            this.gridConfiguration.gridData = response.data;
+            //this.totalCollections = response.totalCount;
+            this.thisMonthCollectionSum = response.thisMonthTotalCollection;     
+            this.todaysTotalCollection = response.todaysTotalCollection;
             this.cdr.detectChanges();
           },
           error: () => {

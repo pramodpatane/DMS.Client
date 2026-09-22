@@ -7,5 +7,7 @@ import { Component } from '@angular/core';
   styleUrl: './sales.css',
 })
 export class Sales {
-
+  createNewSale() {
+    throw new Error('Method not implemented.');
+  }
 }

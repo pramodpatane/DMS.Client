@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './purchase.css',
 })
 export class Purchase {
-
+  createNewPurchase() {}
 }

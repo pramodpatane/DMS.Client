@@ -13,6 +13,7 @@ import { ClientsService } from '../../Services/clients.service';
 import { SwalService } from '../../../global/swal.service';
 import { CommonAgGrid } from '../../../core/Components/common-ag-grid/common-ag-grid';
 import { GridConfigurationModel } from '../../../core/Models/grid-configuration.model';
+import { MenuPermissionsService } from '../../../core/Services/menu.permissions.service';
 
 @Component({
   selector: 'app-clients',
@@ -28,38 +29,23 @@ export class Clients implements OnInit {
   HeaderText: string = "Add Client";
   ButtonText: string = "Insert";
   gridConfiguration: GridConfigurationModel = new GridConfigurationModel();
+  gridData: any[] = [];
   clientsData = [];
   totalCount: number = 0;
   fromDate!: Date;
   DepartmentsList: DropdownModel[] = [];
-  filterdata: FilterData = new FilterData();
+  canView = false;
+  canAdd = false;
+  canEdit = false;
+  canDelete = false;
 
   constructor(private formBuilder: FormBuilder, private clientsService: ClientsService, private cdr: ChangeDetectorRef,
-    private swalService: SwalService, 
-  ) {
-    this.gridConfiguration.gridColumns = [
-      { headerName: 'Action', width: 110, pinned: 'left', sortable: false, filter: false, resizable: false, 
-        cellRenderer: (params: any) => { return ` <div class="d-flex align-items-center justify-content-center gap-2 h-100"> 
-          <button type="button" class="btn btn-sm btn-outline-primary edit-btn" title="Edit" data-action="edit"> <i class="bi bi-pencil"></i> </button> 
-          <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Delete" data-action="delete"> <i class="bi bi-trash"></i> </button> </div> `; }, 
-        onCellClicked: (params: any) => { const target = params.event?.target as HTMLElement; 
-          const button = target.closest('button'); if (!button) { return; } 
-          const action = button.getAttribute('data-action'); 
-          if (action === 'edit') { this.Edit(params.data.recordId); } 
-          if (action === 'delete') { this.Delete(params.data.recordId); } } }, 
-      { field: 'clientCode', width: 100, headerName: 'Client Code', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'firstName', width: 100, headerName: 'First Name', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'lastName', width: 100, headerName: 'Last Name', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'clientType', width: 300, headerName: 'Client Type', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'email', width: 300, headerName: 'Email', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'mobile', width: 100, headerName: 'Mobile', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'alternateMobile', width: 100, headerName: 'Alternate Mobile', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'createdDate', width: 150, headerName: 'Created Date', flex: 1, sortable: true, filter: true, resizable: true }
-    ];
-    this.gridConfiguration.gridTitle = 'Farmer Master';   
-  }
+    private swalService: SwalService, private menuPermissionsState: MenuPermissionsService
+  ) { }
 
   ngOnInit() {
+    this.GetActionPermissions();
+    this.SetGridConfiguration();
     this.GetData();
     this.DeclareForm();
   }
@@ -124,9 +110,96 @@ export class Clients implements OnInit {
     });
   }
 
+  public GetActionPermissions() {
+    this.canView = this.menuPermissionsState.canView('Milk Collection');
+    this.canAdd = this.menuPermissionsState.canAdd('Milk Collection');
+    this.canEdit = this.menuPermissionsState.canEdit('Milk Collection');
+    this.canDelete = this.menuPermissionsState.canDelete('Milk Collection');
+  }
+
+  public SetGridConfiguration() {
+    const columns: any[] = [
+      { field: 'clientCode', width: 100, headerName: 'Farmer Code', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'firstName', width: 100, headerName: 'First Name', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'lastName', width: 100, headerName: 'Last Name', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'clientType', width: 300, headerName: 'Farmer Type', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'email', width: 300, headerName: 'Email', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'mobile', width: 100, headerName: 'Mobile', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'alternateMobile', width: 100, headerName: 'Alternate Mobile', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'createdDate', width: 150, headerName: 'Created Date', flex: 1, sortable: true, filter: true, resizable: true }
+    ];
+    // Add Action column only when BOTH permissions are true    
+    if (this.canEdit || this.canDelete) {
+      columns.unshift({
+        headerName: 'Actions',
+        width: 110,
+        pinned: 'left',
+        sortable: false,
+        filter: false,
+        resizable: false,
+
+        cellRenderer: (params: any) => {
+          let actionButtons = '';
+          if (this.canEdit) {
+            actionButtons += `
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary edit-btn"
+                title="Edit"
+                data-action="edit">
+                <i class="bi bi-pencil"></i>
+              </button>
+            `;
+          }
+
+          if (this.canDelete) {
+            actionButtons += `
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger delete-btn"
+                title="Delete"
+                data-action="delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            `;
+          }
+
+          return `
+            <div class="d-flex align-items-center justify-content-center gap-2 h-100">
+              ${actionButtons}
+            </div>
+          `;
+        },
+
+        onCellClicked: (params: any) => {
+
+          const target = params.event?.target as HTMLElement;
+          const button = target.closest('button');
+
+          if (!button) {
+            return;
+          }
+
+          const action = button.getAttribute('data-action');
+
+          if (action === 'edit' && this.canEdit) {
+            this.Edit(params.data.recordId);
+          }
+
+          if (action === 'delete' && this.canDelete) {
+            this.Delete(params.data.recordId);
+          }
+        }
+      });
+    }
+
+    this.gridConfiguration.gridColumns = columns;
+    this.gridConfiguration.gridTitle = 'Farmer Master';
+  }
+
   onSearch(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.filterdata.filterString = value;
+    this.gridConfiguration.gridFilter.filterString = value;
     const gridColumnFields = this.gridConfiguration.gridColumns
     .filter(column => column.field)
     .map(column => column.field);
@@ -135,7 +208,8 @@ export class Clients implements OnInit {
     .map(field => `${field} like '${value}%'`)
     .join(' OR ');
 
-    this.filterdata.filterString = filterString;
+    this.gridConfiguration.gridFilter.skip = 0;
+    this.gridConfiguration.gridFilter.filterString = filterString;
     this.GetData();
   }
 
@@ -164,14 +238,15 @@ export class Clients implements OnInit {
       const today = new Date();
       const dateBefore120Days = new Date();
       dateBefore120Days.setDate(today.getDate() - 120);
-      this.filterdata.fromDate = dateBefore120Days;
-      this.filterdata.toDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+      this.gridConfiguration.gridFilter.fromDate = dateBefore120Days;
+      this.gridConfiguration.gridFilter.toDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
       
-       (await this.clientsService.GetAllData(this.filterdata)).subscribe({
+       (await this.clientsService.GetAllData(this.gridConfiguration.gridFilter)).subscribe({
           next: (res) => {            
             let response = JSON.parse(JSON.stringify(res));
             //console.log(response)
              this.gridConfiguration.gridData = response.data;
+             this.gridData = response.data;
             this.totalCount = response.totalCount;
             this.cdr.detectChanges();
           },
@@ -255,24 +330,10 @@ export class Clients implements OnInit {
             this.clientForm.get('alternateMobile')?.setValue(response.alternateMobile);
             this.clientForm.get('address')?.setValue(response.address);
             this.clientForm.get('isActive')?.setValue(response.isActive);
-            this.clientForm.get('isDeleted')?.setValue(response.isDeleted);
-            // this.clientForm.patchValue({
-            //   recordId: response.recordId,
-            //   name: response.name,
-            //   clientType: response.clientType,
-            //   clientCode: response.clientCode,
-            //   email: response.email,
-            //   contactPerson: response.contactPerson,
-            //   mobile: response.mobile,
-            //   category: response.category,
-            //   alternateMobile: response.alternateMobile,
-            //   address: response.address,
-            //   isActive: response.isActive,
-            //   isDeleted: response.isDeleted
-            // });
+            this.clientForm.get('isDeleted')?.setValue(response.isDeleted);            
           },
-          error: () => {
-            this.swalService.ShowAlert("error", "");
+          error: (err) => { 
+            this.swalService.ShowAlert("error", err);
           }
         });
     }
@@ -280,6 +341,7 @@ export class Clients implements OnInit {
       throw err;
     }
   }
+  
 
   public async Delete(recordId: string) {
     try {

@@ -23,10 +23,10 @@ export class EmployeeService {
     }
   }
 
-  public async GetById(id: string) {
+  public GetById(id: string) {
     try {
       const apiurl = `${this.baseUrl}${this.apiUrl.GetById}(${id})`;
-      return await this.http.get(apiurl);
+      return this.http.get(apiurl);
     }
     catch (err) {
       throw err;

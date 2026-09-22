@@ -8,7 +8,7 @@
 
     <div class="d-flex align-items-center gap-2">
 
-      <input type="text" class="form-control form-control-sm" style="width: 220px;" placeholder="Search employees..."
+      <input type="text" class="form-control form-control-sm" style="width: 200px;" placeholder="Search employees..."
         (input)="onSearch($event)" />
 
       <button type="button" class="btn btn-sm btn-primary" (click)="OpenForm()">
@@ -19,8 +19,77 @@
     </div>
   </div>
 
-  <app-common-ag-grid [gridConfiguration]="gridConfiguration" [recordCount]="totalCount" (gridEvent)="onGridEvent($event)">
-  </app-common-ag-grid>
+  <div class="d-none d-md-block">
+    <app-common-ag-grid [gridConfiguration]="gridConfiguration" [recordCount]="totalCount" 
+      (gridEvent)="onGridEvent($event)">
+    </app-common-ag-grid>
+  </div>
+
+  <div class="d-md-none">
+    <div class="card mb-3 shadow-sm" *ngFor="let item of gridData">
+
+      <div class="card-body">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+
+          <div>
+            <h6 class="mb-1 fw-bold">
+              {{ item.firstName }} {{item.lastName}}
+            </h6>
+          </div>
+
+          <div class="row g-3">
+
+            <div class="col-12">
+              <small class="text-muted d-block">
+                Email
+              </small>
+
+              <span>
+                {{ item.email }}
+              </span>
+            </div>
+
+            <div class="col-12">
+              <small class="text-muted d-block">
+                Salary
+              </small>
+
+              <span>
+                {{ item.salary }}
+              </span>
+            </div>
+
+            <div class="col-12">
+              <small class="text-muted d-block">
+                Department
+              </small>
+
+              <span>
+                {{ item.department }}
+              </span>
+            </div>
+
+          </div>
+
+          <hr>
+
+          <!-- Actions -->
+          <div class="d-flex flex-column">
+
+            <button class="btn btn-outline-primary btn-sm" (click)="Edit(item.recordId)">
+              Edit
+            </button>             
+            <br>
+            <button class="btn btn-outline-danger btn-sm" (click)="Delete(item.recordId)">
+              Delete
+            </button>
+
+          </div>
+      </div>    
+    </div>
+  </div>
 </div>
 
 <div class="card" *ngIf="!IsDefaultView">

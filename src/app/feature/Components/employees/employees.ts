@@ -3,7 +3,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { SwalService } from '../../../global/swal.service';
 import { EmployeeService } from '../../Services/employee-service';
-import { FilterData } from '../../../core/Models/FilterData';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmployeeModel } from '../../Models/employee.model';
@@ -13,6 +12,7 @@ import { DepartmentService } from '../../../core/Services/departments.service';
 import { DropdownModel } from '../../../auth/Models/dropdown.model';
 import { GridConfigurationModel } from '../../../core/Models/grid-configuration.model';
 import { CommonAgGrid } from '../../../core/Components/common-ag-grid/common-ag-grid';
+import { MenuPermissionsService } from '../../../core/Services/menu.permissions.service';
 
 @Component({
   selector: 'app-employees',
@@ -28,7 +28,7 @@ export class Employees implements OnInit {
   ButtonText: string = "Insert";
   gridColumnFields: any[] = [];
   
-  employeesData = [];
+  gridData: any[] = [];
   totalCount: number = 0;
   fromDate!: Date;
   DepartmentsList: DropdownModel[] = [];
@@ -36,32 +36,19 @@ export class Employees implements OnInit {
   gridConfiguration: GridConfigurationModel = new GridConfigurationModel();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   firstDay: any;
+  canView = false;
+  canAdd = false;
+  canEdit = false;
+  canDelete = false;
   
   constructor(private swalservice: SwalService, private employeeService: EmployeeService, private cdr: ChangeDetectorRef,
-    private formBuilder: FormBuilder, private departmentService: DepartmentService
-  ) {
-    this.gridConfiguration.gridColumns = [
-      { headerName: 'Action', width: 110, pinned: 'left', sortable: false, filter: false, resizable: false, 
-        cellRenderer: (params: any) => { return ` <div class="d-flex align-items-center justify-content-center gap-2 h-100"> 
-          <button type="button" class="btn btn-sm btn-outline-primary edit-btn" title="Edit" data-action="edit"> <i class="bi bi-pencil"></i> </button> 
-          <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Delete" data-action="delete"> <i class="bi bi-trash"></i> </button> </div> `; }, 
-        onCellClicked: (params: any) => { const target = params.event?.target as HTMLElement; 
-          const button = target.closest('button'); if (!button) { return; } 
-          const action = button.getAttribute('data-action'); 
-          if (action === 'edit') { this.Edit(params.data.recordId); } 
-          if (action === 'delete') { this.Delete(params.data.recordId); } } }, 
-      { field: 'firstName', width: 100, headerName: 'First Name', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'lastName', width: 100, headerName: 'Last Name', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'email', width: 300, headerName: 'Email', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'salary', width: 100, headerName: 'Salary', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'department', width: 100, headerName: 'Department', flex: 1, sortable: true, filter: true, resizable: true },
-      { field: 'createdDate', width: 150, headerName: 'Created Date', flex: 1, sortable: true, filter: true, resizable: true }
-    ];
-    this.gridConfiguration.gridTitle = 'Employee Master';
-    //this.gridConfiguration.gridFilter.pagesize = 20;
-  }
+    private formBuilder: FormBuilder, private departmentService: DepartmentService,
+    private menuPermissionsState: MenuPermissionsService
+  ) { }
 
   ngOnInit() {
+    this.GetActionPermissions();
+    this.SetGridConfiguration();
     this.GetData();
     this.DeclareForm();  
     this.GetDepartmentDropdown();
@@ -80,7 +67,7 @@ export class Employees implements OnInit {
 
   DeclareForm() {
     this.employeeForm = this.formBuilder.group({
-      recordId: [''],
+      recordId: [null],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -106,6 +93,92 @@ export class Employees implements OnInit {
     //console.log(model);
     return model;
   }
+
+  public GetActionPermissions() {
+    this.canView = this.menuPermissionsState.canView('Milk Collection');
+    this.canAdd = this.menuPermissionsState.canAdd('Milk Collection');
+    this.canEdit = this.menuPermissionsState.canEdit('Milk Collection');
+    this.canDelete = this.menuPermissionsState.canDelete('Milk Collection');
+  }
+
+  public SetGridConfiguration() {
+    const columns: any[] = [
+      { field: 'firstName', width: 100, headerName: 'First Name', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'lastName', width: 100, headerName: 'Last Name', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'email', width: 300, headerName: 'Email', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'salary', width: 100, headerName: 'Salary', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'department', width: 100, headerName: 'Department', flex: 1, sortable: true, filter: true, resizable: true },
+      { field: 'createdDate', width: 150, headerName: 'Created Date', flex: 1, sortable: true, filter: true, resizable: true }
+    ];
+    // Add Action column only when BOTH permissions are true    
+    if (this.canEdit || this.canDelete) {
+      columns.unshift({
+        headerName: 'Actions',
+        width: 110,
+        pinned: 'left',
+        sortable: false,
+        filter: false,
+        resizable: false,
+
+        cellRenderer: (params: any) => {
+          let actionButtons = '';
+          if (this.canEdit) {
+            actionButtons += `
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary edit-btn"
+                title="Edit"
+                data-action="edit">
+                <i class="bi bi-pencil"></i>
+              </button>
+            `;
+          }
+
+          if (this.canDelete) {
+            actionButtons += `
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger delete-btn"
+                title="Delete"
+                data-action="delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            `;
+          }
+
+          return `
+            <div class="d-flex align-items-center justify-content-center gap-2 h-100">
+              ${actionButtons}
+            </div>
+          `;
+        },
+
+        onCellClicked: (params: any) => {
+
+          const target = params.event?.target as HTMLElement;
+          const button = target.closest('button');
+
+          if (!button) {
+            return;
+          }
+
+          const action = button.getAttribute('data-action');
+
+          if (action === 'edit' && this.canEdit) {
+            this.Edit(params.data.recordId);
+          }
+
+          if (action === 'delete' && this.canDelete) {
+            this.Delete(params.data.recordId);
+          }
+        }
+      });
+    }
+
+    this.gridConfiguration.gridColumns = columns;
+    this.gridConfiguration.gridTitle = 'Employee Master';
+    //this.gridConfiguration.gridFilter.pagesize = 20;
+  }
   
   onSearch(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
@@ -118,41 +191,9 @@ export class Employees implements OnInit {
     .map(field => `${field} like '${value}%'`)
     .join(' OR ');
 
+    this.gridConfiguration.gridFilter.skip = 0;
     this.gridConfiguration.gridFilter.filterString = filterString;
     this.GetData();
-  }
-
-  totalPages(): number {
-    return Math.ceil(
-      this.totalCount / this.gridConfiguration.gridFilter.pagesize
-    );
-  }
-
-  nextPage(): void {
-    if (this.gridConfiguration.gridFilter.pageNumber < this.totalPages()) {
-      this.gridConfiguration.gridFilter.pageNumber++;
-      this.gridConfiguration.gridFilter.skip = (this.gridConfiguration.gridFilter.pageNumber - 1) * this.gridConfiguration.gridFilter.pagesize;
-      this.GetData();
-    }
-  }
-
-  previousPage(): void {
-    if (this.gridConfiguration.gridFilter.pageNumber > 1) {
-      this.gridConfiguration.gridFilter.pageNumber--;
-      this.gridConfiguration.gridFilter.skip = (this.gridConfiguration.gridFilter.pageNumber - 1) * this.gridConfiguration.gridFilter.pagesize;
-      this.GetData();
-    }
-  }
-
-  get currentStart(): number {
-    return ((this.gridConfiguration.gridFilter.pageNumber - 1) * this.gridConfiguration.gridFilter.pagesize) + 1;
-  }
-
-  get currentEnd(): number {
-    return Math.min(
-      this.gridConfiguration.gridFilter.pageNumber * this.gridConfiguration.gridFilter.pagesize,
-      this.totalCount
-    );
   }
 
   onGridEvent(gridFilter: any): void {
@@ -177,8 +218,8 @@ export class Employees implements OnInit {
           next: (res) => {            
             let response = JSON.parse(JSON.stringify(res));
             //console.log(response)
-            this.employeesData = response.data;
             this.gridConfiguration.gridData = response.data;
+            this.gridData = response.data;
             this.totalCount = response.totalCount;
             this.cdr.detectChanges();
           },
@@ -208,8 +249,8 @@ export class Employees implements OnInit {
             }
             this.GetData();
           },
-          error: () => {
-            this.swalservice.ShowAlert("error", "");
+          error: (err) => {
+            this.swalservice.ShowAlert("error", err);
           }
         });
     }
@@ -270,13 +311,13 @@ export class Employees implements OnInit {
   //     console.error('Edit failed:', error); 
   //   } 
   // }
-  public async Edit(recordId: string) {
+  public Edit(recordId: string) {
     try {
       this.HeaderText = "Edit Employee";
       this.ButtonText= "Update";
-      this.toggleIsDefaultView();
       
-       (await this.employeeService.GetById(recordId)).subscribe({
+      
+       this.employeeService.GetById(recordId).subscribe({
           next: (res) => {            
             let response = JSON.parse(JSON.stringify(res))
             //console.log(response)
@@ -288,6 +329,7 @@ export class Employees implements OnInit {
             this.employeeForm.get('departmentId')?.setValue(response.departmentId);
             this.employeeForm.get('isActive')?.setValue(response.isActive);
             this.employeeForm.get('isDeleted')?.setValue(response.isDeleted);
+            this.toggleIsDefaultView();
           },
           error: () => {
             this.swalservice.ShowAlert("error", "");

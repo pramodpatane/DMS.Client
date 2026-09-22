@@ -1,5 +1,5 @@
 <div class="card" *ngIf="IsDefaultView">
-    <div class="card-header d-flex justify-content-between align-items-center bg-secondary">
+  <div class="card-header d-flex justify-content-between align-items-center bg-secondary">
 
     <span class="fw-bold text-white">
       {{ gridConfiguration.gridTitle }}
@@ -10,7 +10,7 @@
       <input type="text" class="form-control form-control-sm" style="width: 220px;" placeholder="Search collection..."
         (input)="onSearch($event)" />
 
-      <button type="button" class="btn btn-sm btn-primary" (click)="OpenForm()">
+      <button type="button" class="btn btn-sm btn-primary" *ngIf="canAdd" (click)="OpenForm()">
         <i class="bi bi-plus-lg me-1"></i>
         Add
       </button>
@@ -18,8 +18,460 @@
     </div>
   </div>
 
-  <app-common-ag-grid [gridConfiguration]="gridConfiguration" [recordCount]="totalCount" (gridEvent)="onGridEvent($event)">
-  </app-common-ag-grid>
+  <div class="d-none d-md-block" *ngIf="canView">
+    <app-common-ag-grid [gridConfiguration]="gridConfiguration" [recordCount]="totalCount"
+      (gridEvent)="onGridEvent($event)">
+    </app-common-ag-grid>
+  </div>
+
+  <div class="d-md-none">
+
+    <div class="card mb-3 shadow-sm" *ngFor="let item of gridData">
+
+      <div class="card-body">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+
+          <div>
+            <h6 class="mb-1 fw-bold">
+              {{ item.centerName }}
+            </h6>
+
+            <small class="text-muted">
+              {{ item.clientName }}
+            </small>
+          </div>
+
+          <div class="row g-3">
+
+            <div class="col-12">
+              <small class="text-muted d-block">
+                Quantity
+              </small>
+
+              <span>
+                {{ item.quantity }}
+              </span>
+            </div>
+
+            <div class="col-12">
+              <small class="text-muted d-block">
+                Collection Date
+              </small>
+
+              <span>
+                {{ item.collectionDate }}
+              </span>
+            </div>
+
+          </div>
+
+          <hr>
+
+          <!-- Actions -->
+
+          <div class="d-flex flex-column">
+
+            <button class="btn btn-outline-primary btn-sm" (click)="Edit(item.recordId)">
+              Edit
+            </button>             
+            <br>
+            <button class="btn btn-outline-danger btn-sm" (click)="Delete(item.recordId)">
+              Delete
+            </button>
+
+          </div>
+
+      </div>
+
+      
+    </div>
+
+  </div>
 </div>
 
+<div class="card" *ngIf="!IsDefaultView">
 
+    <div class="card-header d-flex justify-content-between align-items-center text-white bg-secondary">
+      <span class="fw-bold">{{ FormHeaderText }}</span>
+      <button type="button" class="btn btn-sm btn-primary bg-danger" (click)="toggleIsDefaultView()">X</button>
+    </div>
+
+    <div class="card-body">
+
+      <form [formGroup]="milkCollectionForm" (ngSubmit)="Insert()">
+
+        <div class="row g-3">
+
+
+          <!-- Farmer -->
+          <div class="col-md-3">
+
+            <label class="form-label fw-medium">
+              Farmer
+              <span class="text-danger">*</span>
+            </label>
+
+            <select class="form-select" formControlName="clientId">
+
+              <option value="0" disabled selected>Select Department</option>
+              <option *ngFor="let client of clientsList" [value]="client.value">
+                {{ client.dataText}}
+              </option>
+
+            </select>
+
+            @if (
+            milkCollectionForm.get('farmerId')?.invalid &&
+            milkCollectionForm.get('farmerId')?.touched
+            ) {
+
+            <div class="text-danger small mt-1">
+              Farmer is required.
+            </div>
+
+            }
+
+          </div>
+          <div class="col-md-3">
+
+            <label class="form-label fw-medium">
+              Collection Time
+              <span class="text-danger">*</span>
+            </label>
+
+            <input type="time" class="form-control" formControlName="collectionTime">
+
+            <small class="text-danger" *ngIf="form['collectionTime'].touched && form['collectionTime'].invalid">
+              Department is required
+            </small>
+          </div>
+
+          <!-- Collection Date -->
+          <div class="col-md-3">
+
+            <label class="form-label fw-medium">
+              Collection Date
+              <span class="text-danger">*</span>
+            </label>
+
+            <input type="date" class="form-control" formControlName="collectionDate">
+
+          </div>
+
+
+          <!-- Shift -->
+          <div class="col-md-3">
+
+            <label class="form-label fw-medium">
+              Shift
+              <span class="text-danger">*</span>
+            </label>
+
+            <select class="form-select" formControlName="collectionShift">
+
+              <option value="">
+                Select Shift
+              </option>
+
+              <option value="Morning">
+                Morning
+              </option>
+
+              <option value="Evening">
+                Evening
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Milk Type -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              Milk Type
+              <span class="text-danger">*</span>
+            </label>
+
+            <select class="form-select" formControlName="milkType">
+
+              <option value="">
+                Select Milk Type
+              </option>
+
+              <option value="Cow">
+                Cow Milk
+              </option>
+
+              <option value="Buffalo">
+                Buffalo Milk
+              </option>
+
+              <option value="Mixed">
+                Mixed Milk
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Quantity -->
+          <div class="col-md-2">
+
+            <label class="form-label fw-medium">
+              Quantity
+              <span class="text-danger">*</span>
+            </label>
+
+            <div class="input-group">
+
+              <input type="number" class="form-control" formControlName="quantity" placeholder="Enter quantity">
+
+              <!-- <span class="input-group-text">
+              Liter
+            </span> -->
+
+            </div>
+
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-medium">
+              Unit
+            </label>
+
+            <div class="input-group">
+
+              <select class="form-select" formControlName="uom">
+
+                <option value="">
+                  Select Unit
+                </option>
+
+                <option value="caf62ff0-c75b-4063-bd15-5df6386235db">
+                  Litre
+                </option>
+
+              </select>
+
+            </div>
+          </div>
+
+
+          <!-- FAT -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              FAT %
+            </label>
+
+            <div class="input-group">
+
+              <input type="number" class="form-control" formControlName="fat" placeholder="Enter FAT">
+
+              <span class="input-group-text">
+                %
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- SNF -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              SNF %
+            </label>
+
+            <div class="input-group">
+
+              <input type="number" class="form-control" formControlName="snf" placeholder="Enter SNF">
+
+              <span class="input-group-text">
+                %
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- Temperature -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              Temperature
+            </label>
+
+            <div class="input-group">
+
+              <input type="number" class="form-control" formControlName="temperature" placeholder="Enter temperature">
+
+              <span class="input-group-text">
+                °C
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- Rate -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              Rate
+            </label>
+
+            <div class="input-group">
+
+              <span class="input-group-text">
+                ₹
+              </span>
+
+              <input type="number" class="form-control" formControlName="rate" placeholder="Rate">
+
+            </div>
+
+          </div>
+
+
+          <!-- Total Amount -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              Total Amount
+            </label>
+
+            <div class="input-group">
+
+              <span class="input-group-text">
+                ₹
+              </span>
+
+              <input type="number" class="form-control bg-body-tertiary" formControlName="amount" readonly>
+
+            </div>
+
+          </div>
+
+
+          <!-- Payment Status -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              Payment Status
+            </label>
+
+            <select class="form-select" formControlName="paymentStatus">
+
+              <option value="">
+                Select Status
+              </option>
+
+              <option value="Paid">
+                Paid
+              </option>
+
+              <option value="Pending">
+                Pending
+              </option>
+
+              <option value="Partial">
+                Partial
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Payment Method -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              Payment Method
+            </label>
+
+            <select class="form-select" formControlName="paymentMode">
+
+              <option value="">
+                Select Payment Method
+              </option>
+
+              <option value="Cash">
+                Cash
+              </option>
+
+              <option value="UPI">
+                UPI
+              </option>
+
+              <option value="Bank">
+                Bank Transfer
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Collection Center -->
+          <div class="col-md-4">
+
+            <label class="form-label fw-medium">
+              Collection Center
+            </label>
+
+            <select class="form-select" formControlName="collectionCenter">
+
+              <option value="">
+                Select Collection Center
+              </option>
+
+              <option value="a63feea1-9d4b-4e33-a859-c2935944c6b7">
+                Main Collection Center
+              </option>
+
+              <option value="c115f382-d1ed-4a0d-b59e-41b30de8d7f8">
+                Pune Collection Center
+              </option>
+
+              <option value="c7533c54-efa5-47eb-a6fb-40b441ce26e2">
+                Hadapsar Collection Center
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Remarks -->
+          <div class="col-12">
+
+            <label class="form-label fw-medium">
+              Remarks
+            </label>
+
+            <textarea class="form-control" rows="3" formControlName="description" placeholder="Enter remarks">
+            </textarea>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>
+            Save Collection
+          </button>
+        </div>
+
+      </form>
+    </div>
+</div>

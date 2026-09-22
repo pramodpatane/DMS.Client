@@ -14,6 +14,7 @@ import { UserService } from '../../../core/Services/user-service';
 import { MenuService } from '../../../core/Services/menu.service';
 import { UserStateService } from '../../../core/Services/user.state.service';
 import { SignUp } from '../../../core/Components/sign-up/sign-up';
+import { MenuPermissionsService } from '../../../core/Services/menu.permissions.service';
 
 @Component({
   selector: 'app-login-component',
@@ -37,7 +38,7 @@ export class LoginComponent {
 
   constructor(private authService: AuthService, private router: Router, private userRolesService: UserRolesService,
     private emailService: EmailService, private swalService: SwalService, private userService: UserService,
-    private menuService: MenuService, private userState: UserStateService
+    private menuService: MenuService, private userState: UserStateService, private menuPermissionsState: MenuPermissionsService
   ) {}
 
   ngOnInit() {
@@ -85,7 +86,7 @@ export class LoginComponent {
           response = JSON.stringify(res);
           if(JSON.parse(response).isSuccess == true) {
             localStorage.setItem("IsUserLoggedIn", "True");
-            this.userState.setUser(JSON.parse(response));
+            this.userState.setUser(JSON.parse(response));            
             this.authService.startTokenTimer();
 
             const user = this.userState.user();
@@ -93,7 +94,11 @@ export class LoginComponent {
             if(userGuid) {
               (await this.menuService.GetUserMenus(userGuid)).subscribe({
                 next: (res) => {            
-                  let response = JSON.parse(JSON.stringify(res));                  
+                  let response = JSON.parse(JSON.stringify(res));   
+                  
+                  // Store menus/permissions
+                  this.menuPermissionsState.setMenus(response);               
+                  
                   const firstMenu = response.find((m: { link: any; }) => m.link);
                   if (firstMenu) {
                     this.router.navigate([firstMenu.link]);
