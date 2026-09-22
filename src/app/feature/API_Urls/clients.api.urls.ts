@@ -4,4 +4,5 @@ export class ClientsApiUrls {
     public Insert : string = 'api/Clients/Insert';
     public Update : string = 'api/Clients/Update';
     public Delete : string = 'api/Clients/Delete';
+    public GetDropdown : string = 'api/Clients/GetDropdown';
 }

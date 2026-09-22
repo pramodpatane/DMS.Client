@@ -7,7 +7,7 @@
     [defaultColDef]="{ sortable: true, filter: true, resizable: true }">
 </ag-grid-angular>
 
-<div class="d-flex justify-content-between align-items-center mx-2 my-2">
+<div class="d-flex justify-content-between align-items-center mx-2 my-2" *ngIf="gridConfiguration.isPaginationEnabled">
 
   <!-- Left: Record information -->
   <div class="text-muted text-bold">

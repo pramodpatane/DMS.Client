@@ -1,6 +1,6 @@
 export class EmployeeModel {
     id: number = 0;
-    recordId: string = "";
+    recordId?: string;
     firstName: string = "";
     lastName: String = "";
     email: string = "";

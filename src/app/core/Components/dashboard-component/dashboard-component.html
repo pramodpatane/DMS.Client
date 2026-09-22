@@ -21,9 +21,9 @@
             <div class="card dashboard-card shadow-lg border-0">
                 <div class="card-body">
                     <h6>Milk Collection</h6>
-                    <h2>320 L</h2>
+                    <h2>{{ thisMonthCollectionSum }}L</h2>
                     <small class="text-primary">
-                        Today
+                        Todays {{ todaysTotalCollection }}L
                     </small>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                     Recent Milk Collections
                 </div>
 
-                <div class="table-responsive">
+                <!-- <div class="table-responsive">
 
                     <table class="table table-hover mb-0">
 
@@ -152,7 +152,10 @@
 
                     </table>
 
-                </div>
+                </div> -->
+                <app-common-ag-grid [gridConfiguration]="gridConfiguration" [recordCount]="totalCollections"
+                    (gridEvent)="onGridEvent($event)">
+                </app-common-ag-grid>
 
             </div>
 

@@ -1,1 +1,570 @@
-<p>sales works!</p>
+<div class="container-fluid py-3">
+
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-semibold mb-1">Sales</h4>
+      <p class="text-secondary mb-0">
+        Manage milk and dairy product sales
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary d-flex align-items-center gap-2"
+      (click)="createNewSale()">
+      <i class="bi bi-plus-lg"></i>
+      New Sale
+    </button>
+  </div>
+
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+
+    <!-- Today's Sales -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-start">
+
+            <div>
+              <div class="text-secondary small">
+                Today's Sales
+              </div>
+
+              <h3 class="fw-bold mt-2 mb-1">
+                ₹48,250
+              </h3>
+
+              <span class="text-success small">
+                <i class="bi bi-arrow-up"></i>
+                12.5%
+              </span>
+            </div>
+
+            <div class="rounded-3 bg-primary-subtle text-primary p-3">
+              <i class="bi bi-cart3 fs-5"></i>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Milk Sold -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-start">
+
+            <div>
+              <div class="text-secondary small">
+                Milk Sold
+              </div>
+
+              <h3 class="fw-bold mt-2 mb-1">
+                1,245 L
+              </h3>
+
+              <span class="text-success small">
+                <i class="bi bi-arrow-up"></i>
+                8.4%
+              </span>
+            </div>
+
+            <div class="rounded-3 bg-success-subtle text-success p-3">
+              <i class="bi bi-droplet fs-5"></i>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Pending Payment -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-start">
+
+            <div>
+              <div class="text-secondary small">
+                Pending Payment
+              </div>
+
+              <h3 class="fw-bold mt-2 mb-1">
+                ₹12,850
+              </h3>
+
+              <span class="text-danger small">
+                18 Customers
+              </span>
+            </div>
+
+            <div class="rounded-3 bg-warning-subtle text-warning p-3">
+              <i class="bi bi-wallet2 fs-5"></i>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Customers -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-start">
+
+            <div>
+              <div class="text-secondary small">
+                Total Customers
+              </div>
+
+              <h3 class="fw-bold mt-2 mb-1">
+                325
+              </h3>
+
+              <span class="text-secondary small">
+                Active customers
+              </span>
+            </div>
+
+            <div class="rounded-3 bg-info-subtle text-info p-3">
+              <i class="bi bi-people fs-5"></i>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- Create Sale -->
+  <div class="card border-0 shadow-sm mb-4">
+
+    <!-- Header -->
+    <div class="card-header bg-body border-0 py-3">
+
+      <div class="d-flex justify-content-between align-items-center">
+
+        <div>
+          <h5 class="fw-semibold mb-1">
+            Create Sale
+          </h5>
+
+          <small class="text-secondary">
+            Enter customer and product details
+          </small>
+        </div>
+
+        <span class="badge text-bg-success">
+          New Transaction
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+      <!-- Customer Details -->
+      <div class="row g-3">
+
+        <div class="col-lg-4">
+          <label class="form-label fw-medium">
+            Customer
+          </label>
+
+          <select class="form-select">
+            <option value="">Select Customer</option>
+            <option>Raj Dairy Farm</option>
+            <option>Shree Hotel</option>
+            <option>ABC Foods</option>
+          </select>
+        </div>
+
+
+        <div class="col-lg-4">
+          <label class="form-label fw-medium">
+            Sale Date
+          </label>
+
+          <input
+            type="date"
+            class="form-control">
+        </div>
+
+
+        <div class="col-lg-4">
+          <label class="form-label fw-medium">
+            Payment Method
+          </label>
+
+          <select class="form-select">
+            <option>Cash</option>
+            <option>UPI</option>
+            <option>Bank Transfer</option>
+            <option>Credit</option>
+          </select>
+        </div>
+
+      </div>
+
+
+      <!-- Product Table -->
+      <div class="table-responsive mt-4">
+
+        <table class="table table-hover align-middle">
+
+          <thead class="table-light">
+
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Unit</th>
+              <th>Rate</th>
+              <th>Discount</th>
+              <th class="text-end">Amount</th>
+              <th></th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr>
+
+              <td>
+                <select class="form-select">
+                  <option>Full Cream Milk</option>
+                  <option>Standard Milk</option>
+                  <option>Curd</option>
+                  <option>Paneer</option>
+                  <option>Ghee</option>
+                </select>
+              </td>
+
+              <td>
+                <input
+                  type="number"
+                  class="form-control"
+                  value="10">
+              </td>
+
+              <td>
+                <select class="form-select">
+                  <option>Liter</option>
+                  <option>Kg</option>
+                  <option>Packet</option>
+                </select>
+              </td>
+
+              <td>
+                <input
+                  type="number"
+                  class="form-control"
+                  value="60">
+              </td>
+
+              <td>
+                <input
+                  type="number"
+                  class="form-control"
+                  value="0">
+              </td>
+
+              <td class="text-end fw-semibold">
+                ₹600
+              </td>
+
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- Add Product -->
+      <button
+        type="button"
+        class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+        <i class="bi bi-plus"></i>
+        Add Product
+      </button>
+
+
+      <!-- Total Section -->
+      <div class="row justify-content-end mt-4">
+
+        <div class="col-xl-4 col-lg-5 col-md-6">
+
+          <div class="border rounded-3 bg-body-tertiary p-3">
+
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-secondary">
+                Subtotal
+              </span>
+
+              <span>
+                ₹600
+              </span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-secondary">
+                Discount
+              </span>
+
+              <span>
+                ₹0
+              </span>
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-between">
+              <span class="fw-semibold">
+                Total Amount
+              </span>
+
+              <span class="fw-bold fs-5 text-primary">
+                ₹600
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="card-footer bg-body border-0 d-flex justify-content-end gap-2">
+
+      <button
+        type="button"
+        class="btn btn-light border">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary d-flex align-items-center gap-2">
+        <i class="bi bi-check2"></i>
+        Save Sale
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- Recent Sales -->
+  <div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-body border-0 py-3">
+
+      <div class="d-flex justify-content-between align-items-center">
+
+        <h5 class="fw-semibold mb-0">
+          Recent Sales
+        </h5>
+
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary">
+          View All
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+      <table class="table table-hover align-middle mb-0">
+
+        <thead class="table-light">
+
+          <tr>
+            <th>Invoice</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Quantity</th>
+            <th>Amount</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr>
+
+            <td class="fw-medium">
+              INV-10025
+            </td>
+
+            <td>
+              Raj Dairy Farm
+            </td>
+
+            <td>
+              15 Aug 2026
+            </td>
+
+            <td>
+              25 L
+            </td>
+
+            <td class="fw-semibold">
+              ₹1,500
+            </td>
+
+            <td>
+              UPI
+            </td>
+
+            <td>
+              <span class="badge text-bg-success">
+                Paid
+              </span>
+            </td>
+
+            <td class="text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-light">
+                <i class="bi bi-three-dots"></i>
+              </button>
+            </td>
+
+          </tr>
+
+
+          <tr>
+
+            <td class="fw-medium">
+              INV-10024
+            </td>
+
+            <td>
+              Shree Hotel
+            </td>
+
+            <td>
+              15 Aug 2026
+            </td>
+
+            <td>
+              40 L
+            </td>
+
+            <td class="fw-semibold">
+              ₹2,400
+            </td>
+
+            <td>
+              Credit
+            </td>
+
+            <td>
+              <span class="badge text-bg-warning">
+                Pending
+              </span>
+            </td>
+
+            <td class="text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-light">
+                <i class="bi bi-three-dots"></i>
+              </button>
+            </td>
+
+          </tr>
+
+
+          <tr>
+
+            <td class="fw-medium">
+              INV-10023
+            </td>
+
+            <td>
+              ABC Foods
+            </td>
+
+            <td>
+              14 Aug 2026
+            </td>
+
+            <td>
+              30 L
+            </td>
+
+            <td class="fw-semibold">
+              ₹1,800
+            </td>
+
+            <td>
+              Cash
+            </td>
+
+            <td>
+              <span class="badge text-bg-success">
+                Paid
+              </span>
+            </td>
+
+            <td class="text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-light">
+                <i class="bi bi-three-dots"></i>
+              </button>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

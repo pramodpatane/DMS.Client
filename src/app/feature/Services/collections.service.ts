@@ -1,15 +1,15 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { ClientsApiUrls } from "../API_Urls/clients.api.urls";
-import { ClientsModel } from "../Models/clients.model";
+import { CollectionsApiUrls } from "../API_Urls/collections.api.urls";
+import { CollectionModel } from "../Models/collection.model";
 
 @Injectable({
     providedIn: 'root'
 })
 
-export class ClientsService {
+export class CollectionsService {
     baseUrl: string = 'https://localhost:44391/';
-    apiUrl: ClientsApiUrls = new ClientsApiUrls();
+    apiUrl: CollectionsApiUrls = new CollectionsApiUrls();
 
     constructor(private http: HttpClient) { }
 
@@ -23,17 +23,27 @@ export class ClientsService {
         }
     }
 
-    public GetById(id: string) {
+    public async GetRecentCollections() {
         try {
-            const apiurl = `${this.baseUrl}${this.apiUrl.GetById}(${id})`;
-            return this.http.get(apiurl);
+            const apiurl = `${this.baseUrl}${this.apiUrl.GetRecentCollection}`;
+            return await this.http.get(apiurl);
         }
         catch (err) {
             throw err;
         }
     }
 
-    public async InsertData(data: ClientsModel) {
+    public async GetById(id: string) {
+        try {
+            const apiurl = `${this.baseUrl}${this.apiUrl.GetById}(${id})`;
+            return await this.http.get(apiurl);
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    public async InsertData(data: CollectionModel) {
         try {
             const apiurl = `${this.baseUrl}${this.apiUrl.Insert}`;
             return await this.http.post(apiurl, data);
@@ -42,7 +52,7 @@ export class ClientsService {
         }
     }
 
-    public async UpdateData(data: any) {
+    public async UpdateData(data: CollectionModel) {
         try {
             const apiurl = `${this.baseUrl}${this.apiUrl.Update}`;
             return await this.http.put(apiurl, data);
@@ -55,15 +65,6 @@ export class ClientsService {
         try {
             const apiurl = `${this.baseUrl}${this.apiUrl.Delete}(${recordId})`;
             return await this.http.delete(apiurl);
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    public async GetDropdown() {
-        try {
-            const apiurl = `${this.baseUrl}${this.apiUrl.GetDropdown}`;
-            return this.http.get(apiurl);
         } catch (err) {
             throw err;
         }
